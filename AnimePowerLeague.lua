@@ -1,9 +1,10 @@
 -- [[ STEMTV | ANIME POWER LEAGUE ALL-IN-ONE ]] --
+-- เลือกใช้ Task Library เพื่อความแม่นยำสูงกว่า wait() ปกติ
 if not game:IsLoaded() then game.Loaded:Wait() end
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
-    Name = "STEMTV | Anime Power League ??",
+    Name = "STEMTV | Anime Power League ⚡",
     LoadingTitle = "STEMTVx1 Script Hub",
     LoadingSubtitle = "The Perfect Edition",
     ConfigurationSaving = { Enabled = true, FolderName = "STEMTV_APL", FileName = "MainConfig" },
@@ -23,7 +24,7 @@ local TriggerMobility = RS:WaitForChild("Events"):WaitForChild("TriggerMobility"
 local enemiesFolder = workspace:WaitForChild("ActiveEnemies")
 
 _G.Height = 15
-_G.AutoStats = true
+_G.AutoStats = false -- ปรับเป็น false เริ่มต้นเพื่อความปลอดภัย
 
 -- ===================== Helper Functions =====================
 local function getChar()
@@ -38,65 +39,42 @@ end
 local Tab1 = Window:CreateTab("Auto Farm", "zap")
 
 Tab1:CreateToggle({
-    Name = "?? Auto Farm ALL Stats (One Click)",
+    Name = "🔥 Auto Farm ALL Stats",
     CurrentValue = _G.AutoStats,
     Callback = function(v)
         _G.AutoStats = v
         if v then
             task.spawn(function()
                 while _G.AutoStats do
-                    pcall(function()
-                        for i = 1, 8 do TrainSignal:FireServer(i) end
+                    local success, _ = pcall(function()
+                        for i = 1, 8 do 
+                            if not _G.AutoStats then break end
+                            TrainSignal:FireServer(i) 
+                        end
                         TriggerMobility:FireServer()
                     end)
-                    task.wait(0.1)
+                    task.wait(0.15) -- ปรับเวลาขึ้นเล็กน้อยเพื่อลดอาการกระตุกของ Client
                 end
             end)
         end
     end
 })
 
-local function addStat(name, id)
-    local state = false
-    Tab1:CreateToggle({
-        Name = name,
-        Callback = function(v)
-            state = v
-            task.spawn(function()
-                while state do pcall(function() TrainSignal:FireServer(id) end) task.wait() end
-            end)
-        end
-    })
-end
-
-addStat("Strength", 1)
-addStat("Health", 2)
-addStat("Psychic", 3)
-addStat("Defense", 5)
-addStat("Magic", 6)
-addStat("Melee", 7)
-addStat("Aura", 8)
-
--- ===================== TAB 2: REMOTE SHOP (WIKI DATA) =====================
+-- ===================== TAB 2: REMOTE SHOP =====================
 local Tab2 = Window:CreateTab("Remote Shop", "shopping-cart")
 
--- 智臓卉忠匚ら听登簍犒早腔荒� Wiki (莱勍耀�丗�萢忠匚 20 疔茹)
 local shopsData = {
     {Store = "Starter Store", Item = "Dumbbell", Price = "Free/Low"},
-    {Store = "Lifting Store", Item = "Heavy Weight", Price = "500 Tokens"},
-    {Store = "Rocks Store", Item = "Strange Matter", Price = "10M Tokens"}, -- Best Health
-    {Store = "Church Store", Item = "Devil Skull", Price = "50M Tokens"},   -- Best Psychic
-    {Store = "Technology Store", Item = "Ultimate Booster", Price = "500M Tokens"},
-    {Store = "Exotic Weights Store", Item = "Exotic Matter", Price = "5B Tokens"}
+    {Store = "Rocks Store", Item = "Strange Matter", Price = "10M Tokens"},
+    {Store = "Church Store", Item = "Devil Skull", Price = "50M Tokens"},
+    {Store = "Technology Store", Item = "Ultimate Booster", Price = "500M Tokens"}
 }
 
-Tab2:CreateSection("?? Best Buy (Wiki Recommended Items)")
-
+Tab2:CreateSection("🛒 Quick Purchase")
 for _, data in ipairs(shopsData) do
     Tab2:CreateButton({
-        Name = "Buy: " .. data.Item .. " (" .. data.Price .. ")",
+        Name = "Buy: " .. data.Item,
         Callback = function()
-            -- ら綱勗愆�揃刪煤曽疆丿單友〈叩勧怏
             local found = false
             for _, obj in pairs(workspace:GetDescendants()) do
                 if obj:IsA("ProximityPrompt") and (string.find(obj.Parent.Name, data.Item) or string.find(obj.ObjectText, data.Item)) then
@@ -105,31 +83,18 @@ for _, data in ipairs(shopsData) do
                     break
                 end
             end
-            
             if not found then
-                Rayfield:Notify({
-                    Title = "Notice",
-                    Content = "牧忠匚ら吮争昇禮皓校僭�済 肪徑簍犒槍争預揶禮弛対",
-                    Duration = 3,
-                })
+                Rayfield:Notify({Title = "Error", Content = "Item not found in current area!", Duration = 2})
             end
         end
     })
 end
 
--- ===================== TAB 3: AUTO COMBAT =====================
+-- ===================== TAB 3: COMBAT =====================
 local Tab3 = Window:CreateTab("Combat", "swords")
 
-Tab3:CreateSlider({
-    Name = "God Mode Height",
-    Range = {5, 50},
-    Increment = 1,
-    CurrentValue = _G.Height,
-    Callback = function(v) _G.Height = v end,
-})
-
 Tab3:CreateToggle({
-    Name = "?? Auto Farm Zones (1-9)",
+    Name = "⚔️ Auto Farm Zones (1-9)",
     Callback = function(v)
         _G.AutoMonster = v
         task.spawn(function()
@@ -137,14 +102,14 @@ Tab3:CreateToggle({
                 local char, hrp, hum = getChar()
                 if char then
                     for i = 1, 9 do
-                        if not _G.AutoMonster or hum.Health <= 0 then break end
+                        if not _G.AutoMonster then break end
                         local zone = enemiesFolder:FindFirstChild(tostring(i))
                         if zone then
                             for _, enemy in pairs(zone:GetChildren()) do
-                                if enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                                if enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy:FindFirstChild("HumanoidRootPart") then
                                     while _G.AutoMonster and enemy.Parent and enemy.Humanoid.Health > 0 and hum.Health > 0 do
                                         pcall(function() 
-                                             hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, _G.Height, 0)
+                                            hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, _G.Height, 0)
                                             AbilityEvent:FireServer("Punch", hrp.Position, 2, enemy)
                                         end)
                                         task.wait(0.1)
@@ -160,27 +125,10 @@ Tab3:CreateToggle({
     end
 })
 
--- ===================== TAB 4: SETTINGS =====================
-local Tab4 = Window:CreateTab("Settings", "shield")
-
-Tab4:CreateToggle({
-    Name = "?? Hide Player Name",
-    Callback = function(v)
-        _G.HideName = v
-        task.spawn(function()
-            while _G.HideName do
-                local _, _, hum = getChar()
-                if hum then hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
-                task.wait(2)
-            end
-        end)
-    end
-})
-
 -- ===================== ANTI-AFK =====================
 player.Idled:Connect(function()
     VirtualUser:CaptureController()
     VirtualUser:ClickButton2(Vector2.new())
 end)
 
-Rayfield:Notify({Title = "STEMTV SYSTEM", Content = "Script is Ready!", Duration = 5})
+Rayfield:Notify({Title = "SYSTEM LOADED", Content = "Welcome back, คุณ STEMTV", Duration = 5})
