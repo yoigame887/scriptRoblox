@@ -1,1 +1,1 @@
-STEMTV_2026_FREE
+loadstring(game:HttpGet("https://raw.githubusercontent.com/yoigame887/scriptRoblox/refs/heads/main/AnimePowerLeague.lua", true))()
