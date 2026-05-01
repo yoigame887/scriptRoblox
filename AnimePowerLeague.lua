@@ -5,18 +5,22 @@ if not game:IsLoaded() then game.Loaded:Wait() end
 
 -- ===================== CONFIGURATION =====================
 local KeySettings = {
+    -- ลิงก์ Raw GitHub สำหรับเช็คคีย์ที่ถูกต้อง
+    RawKeyURL = "https://raw.githubusercontent.com/yoigame887/scriptRoblox/main/key.txt",
+    -- ลิงก์ Linkvertise ของคุณ STEMTV
     LinkvertiseURL = "https://link-target.net/5260763/CEhU5viLVRiu"
 }
 
 -- โหลด UI Library
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- ฟังก์ชันดึงคีย์ปัจจุบัน
+-- ฟังก์ชันดึงคีย์ปัจจุบันจาก GitHub
 local function GetKey()
     local success, key = pcall(function()
+        -- ใช้ gsub เพื่อลบช่องว่างหรืออักขระแปลกปลอมที่อาจติดมา
         return game:HttpGet(KeySettings.RawKeyURL):gsub("%s+", "")
     end)
-    return success and key or "ERROR"
+    return success and key or "ERROR_FETCHING_KEY"
 end
 
 local ActualKey = GetKey()
@@ -35,11 +39,12 @@ KeyTab:CreateInput({
     Name = "Enter Key",
     PlaceholderText = "Paste key here...",
     Callback = function(Value)
-        if Value == ActualKey then
+        -- ลบช่องว่างก่อนเช็คเพื่อป้องกัน Error จากการ Copy
+        if Value:gsub("%s+", "") == ActualKey then
             Rayfield:Notify({Title = "Success!", Content = "Key Correct! Loading Main Script...", Duration = 3})
             task.wait(1)
             KeyWindow:Destroy()
-            StartMainScript() -- เรียกสคริปต์หลักเมื่อคีย์ถูกต้อง
+            StartMainScript() -- เรียกใช้สคริปต์หลัก
         else
             Rayfield:Notify({Title = "Error", Content = "Invalid Key! Please get a new one.", Duration = 3})
         end
