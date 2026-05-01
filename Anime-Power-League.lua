@@ -6,9 +6,9 @@ if not game:IsLoaded() then game.Loaded:Wait() end
 -- ===================== CONFIGURATION =====================
 local KeySettings = {
     -- ลิงก์ Raw GitHub สำหรับเช็คคีย์ที่ถูกต้อง
-    RawKeyURL = "https://raw.githubusercontent.com/yoigame887/scriptRoblox/main/key.txt",
+    RawKeyURL = "https://raw.githubusercontent.com/yoigame887/scriptRoblox/refs/heads/main/key.txt",
     -- ลิงก์ Linkvertise ของคุณ STEMTV
-    LinkvertiseURL = "https://link-target.net/5260763/CEhU5viLVRiu"
+    LinkvertiseURL = "https://direct-link.net/5260763/MaxSPDdR7WfB"
 }
 
 -- โหลด UI Library
