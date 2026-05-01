@@ -5,7 +5,6 @@ if not game:IsLoaded() then game.Loaded:Wait() end
 
 -- ===================== CONFIGURATION =====================
 local KeySettings = {
-    RawKeyURL = "https://raw.githubusercontent.com/yoigame887/scriptRoblox/main/key.txt",
     LinkvertiseURL = "https://link-target.net/5260763/CEhU5viLVRiu"
 }
 
