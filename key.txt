@@ -1,1 +1,1 @@
-stemtv
+loadstring(game:HttpGet("https://raw.githubusercontent.com/yoigame887/scriptRoblox/main/AnimePowerLeague.lua", true))()
