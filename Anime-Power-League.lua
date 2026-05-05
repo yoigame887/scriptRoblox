@@ -1,187 +1,262 @@
--- [[ STEMTV | ANIME POWER LEAGUE ALL-IN-ONE + KEY SYSTEM ]] --
+-- [[ STEMTV X SCRIPTS-RBX | ANIME POWER LEAGUE - AIO ULTIMATE VERSION ]] --
+-- featuring STEMTV Key System (Security Enabled)
 
--- ตรวจสอบการโหลดเกม
-if not game:IsLoaded() then game.Loaded:Wait() end
-
--- ===================== CONFIGURATION =====================
-local KeySettings = {
-    -- ลิงก์ Raw GitHub สำหรับเช็คคีย์ที่ถูกต้อง
-    RawKeyURL = "https://raw.githubusercontent.com/yoigame887/scriptRoblox/refs/heads/main/key.txt",
-    -- ลิงก์ Linkvertise ของคุณ STEMTV
-    LinkvertiseURL = "https://direct-link.net/5260763/MaxSPDdR7WfB"
-}
-
--- โหลด UI Library
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
--- ฟังก์ชันดึงคีย์ปัจจุบันจาก GitHub
-local function GetKey()
-    local success, key = pcall(function()
-        -- ใช้ gsub เพื่อลบช่องว่างหรืออักขระแปลกปลอมที่อาจติดมา
-        return game:HttpGet(KeySettings.RawKeyURL):gsub("%s+", "")
-    end)
-    return success and key or "ERROR_FETCHING_KEY"
-end
-
-local ActualKey = GetKey()
-
--- ===================== KEY SYSTEM UI =====================
-local KeyWindow = Rayfield:CreateWindow({
-    Name = "STEMTV SYSTEM | Key Verification",
-    LoadingTitle = "Checking Access...",
-    LoadingSubtitle = "by STEMTVx1",
-    ConfigurationSaving = { Enabled = false }
-})
-
-local KeyTab = KeyWindow:CreateTab("Key System", "key")
-
-KeyTab:CreateInput({
-    Name = "Enter Key",
-    PlaceholderText = "Paste key here...",
-    Callback = function(Value)
-        -- ลบช่องว่างก่อนเช็คเพื่อป้องกัน Error จากการ Copy
-        if Value:gsub("%s+", "") == ActualKey then
-            Rayfield:Notify({Title = "Success!", Content = "Key Correct! Loading Main Script...", Duration = 3})
-            task.wait(1)
-            KeyWindow:Destroy()
-            StartMainScript() -- เรียกใช้สคริปต์หลัก
-        else
-            Rayfield:Notify({Title = "Error", Content = "Invalid Key! Please get a new one.", Duration = 3})
-        end
-    end,
-})
-
-KeyTab:CreateButton({
-    Name = "Get Key (Copy Link)",
-    Callback = function()
-        setclipboard(KeySettings.LinkvertiseURL)
-        Rayfield:Notify({Title = "Copied!", Content = "Link copied to clipboard! Paste in browser.", Duration = 5})
-    end,
-})
-
--- ===================== MAIN SCRIPT FUNCTION =====================
-function StartMainScript()
-    local Window = Rayfield:CreateWindow({
-        Name = "STEMTV | Anime Power League ⚡",
-        LoadingTitle = "STEMTVx1 Script Hub",
-        LoadingSubtitle = "The Perfect Edition",
-        ConfigurationSaving = { Enabled = true, FolderName = "STEMTV_APL", FileName = "MainConfig" },
-        ToggleUIKeybind = "K",
-        Theme = "DarkBlue",
-    })
-
-    -- Services & Variables
-    local RS = game:GetService("ReplicatedStorage")
-    local Players = game:GetService("Players")
-    local VirtualUser = game:GetService("VirtualUser")
-    local player = Players.LocalPlayer
-
-    local AbilityEvent = RS:WaitForChild("Events"):WaitForChild("AbilityEvent")
-    local TrainSignal = RS:WaitForChild("Events"):WaitForChild("TrainSignal")
-    local TriggerMobility = RS:WaitForChild("Events"):WaitForChild("TriggerMobility")
-    local enemiesFolder = workspace:WaitForChild("ActiveEnemies")
-
-    _G.Height = 15
-    _G.AutoStats = false
-
-    local function getChar()
-        local char = player.Character
-        if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
-            return char, char.HumanoidRootPart, char.Humanoid
-        end
+-- ===================== KEY VERIFICATION =====================
+local function getStoredKey()
+    if not isfile("stemtv_key.txt") then
         return nil
     end
+    local key = readfile("stemtv_key.txt")
+    return key:match("^%s*(.-)%s*$") -- trim whitespace
+end
 
-    -- TAB 1: AUTO FARM
-    local Tab1 = Window:CreateTab("Auto Farm", "zap")
-    Tab1:CreateToggle({
-        Name = "🔥 Auto Farm ALL Stats",
-        CurrentValue = _G.AutoStats,
-        Callback = function(v)
-            _G.AutoStats = v
-            if v then
-                task.spawn(function()
-                    while _G.AutoStats do
-                        pcall(function()
-                            for i = 1, 8 do 
-                                if not _G.AutoStats then break end
-                                TrainSignal:FireServer(i) 
+local function saveKey(keyValue)
+    writefile("stemtv_key.txt", keyValue)
+end
+
+local function fetchKeyFromWeb()
+    local success, response = pcall(function()
+        return game:HttpGet("https://gist.githubusercontent.com/raw/d8e995c3b4e934c7261709b65fb9b2ed/stemtv-key.txt")
+    end)
+    
+    if success and response then
+        -- Extract and clean key
+        local key = response:match("^%s*(.-)%s*$") -- trim whitespace
+        if key and #key > 10 then
+            return key
+        end
+    end
+    return nil
+end
+
+local function verifyKey(key)
+    -- Key must start with "stemtv-" (case insensitive) and be valid length
+    return key and string.lower(key):find("^stemtv%-") and #key > 10
+end
+
+local CurrentKey = getStoredKey()
+
+-- If no valid stored key, try to fetch from web
+if not verifyKey(CurrentKey) then
+    CurrentKey = fetchKeyFromWeb()
+    if verifyKey(CurrentKey) then
+        saveKey(CurrentKey)
+    else
+        -- No valid key - block script execution
+        warn("🔐 STEMTV Script Protection")
+        warn("❌ No valid key found")
+        warn("📌 Please click the link below to get your key:")
+        warn("🔗 https://yoigame887.github.io/stemtv-keypage/")
+        error("STEMTV Key Required - Please visit the link above")
+    end
+end
+
+print("✅ STEMTV Authentication: SUCCESS")
+
+-- ===================== INITIALIZE =====================
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local RS = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
+local player = Players.LocalPlayer
+
+-- Remote Events & Folders
+local Events = RS:WaitForChild("Events")
+local TrainSignal = Events:WaitForChild("TrainSignal")
+local TriggerMobility = Events:WaitForChild("TriggerMobility")
+local AbilityEvent = Events:WaitForChild("AbilityEvent")
+local enemiesFolder = workspace:WaitForChild("ActiveEnemies")
+
+-- Global States
+_G.AutoStatsMaster = false
+_G.SelectedStats = {
+    [1] = false, -- Strength
+    [2] = false, -- Health
+    [3] = false, -- Psychic
+    [5] = false, -- Defense
+    [6] = false, -- Magic
+    [7] = false, -- Melee
+    [8] = false  -- Aura
+}
+_G.AutoMonster = false
+_G.AutoInteract = false
+_G.SelectedZone = "1"
+_G.Height = 15
+
+-- ===================== FUNCTIONS =====================
+local function getChar()
+    local char = player.Character
+    if not char then return nil end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+    if hrp and hum and hum.Health > 0 then
+        return char, hrp, hum
+    end
+    return nil
+end
+
+local function getTarget(zoneName)
+    local zone = enemiesFolder:FindFirstChild(tostring(zoneName))
+    if not zone then return nil end
+    
+    for _, enemy in ipairs(zone:GetChildren()) do
+        local hum = enemy:FindFirstChild("Humanoid")
+        local e_hrp = enemy:FindFirstChild("HumanoidRootPart")
+        if hum and hum.Health > 0 and e_hrp then
+            return enemy, e_hrp
+        end
+    end
+    return nil
+end
+
+-- ===================== UI SETUP =====================
+local Window = Rayfield:CreateWindow({
+    Name = "STEMTVx1 | Anime Power League",
+    LoadingTitle = "STEMTV Digital Brand",
+    LoadingSubtitle = "by ScriptsRBX",
+    ConfigurationSaving = { Enabled = true, FolderName = "STEMTV_Configs", FileName = "APL_Ultimate" },
+    ToggleUIKeybind = "K",
+    Theme = "DarkBlue",
+})
+
+-- ===================== TABS =====================
+local Tab1 = Window:CreateTab("Auto Farm", "zap")
+local Tab2 = Window:CreateTab("Auto Combat", "swords")
+local Tab3 = Window:CreateTab("Quest & NPC", "map-pin")
+
+-- --- TAB 1: AUTO STATS (Individual Selection) ---
+Tab1:CreateSection("Master Control")
+
+Tab1:CreateToggle({
+    Name = "🚀 Start Farming Selected Stats",
+    CurrentValue = _G.AutoStatsMaster,
+    Callback = function(v)
+        _G.AutoStatsMaster = v
+        if v then
+            task.spawn(function()
+                while _G.AutoStatsMaster do
+                    pcall(function()
+                        for id, enabled in pairs(_G.SelectedStats) do
+                            if not _G.AutoStatsMaster then break end
+                            if enabled then
+                                TrainSignal:FireServer(id)
                             end
-                            TriggerMobility:FireServer()
-                        end)
-                        task.wait(0.15)
-                    end
-                end)
-            end
+                        end
+                        TriggerMobility:FireServer()
+                    end)
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end
+})
+
+Tab1:CreateSection("Select Stats to Farm")
+
+local function AddStatToggle(name, id)
+    Tab1:CreateToggle({
+        Name = "Train " .. name,
+        CurrentValue = _G.SelectedStats[id],
+        Callback = function(v)
+            _G.SelectedStats[id] = v
         end
     })
+end
 
-    -- TAB 2: REMOTE SHOP
-    local Tab2 = Window:CreateTab("Remote Shop", "shopping-cart")
-    local shopsData = {
-        {Store = "Starter Store", Item = "Dumbbell"},
-        {Store = "Rocks Store", Item = "Strange Matter"},
-        {Store = "Church Store", Item = "Devil Skull"},
-        {Store = "Technology Store", Item = "Ultimate Booster"}
-    }
-    Tab2:CreateSection("🛒 Quick Purchase")
-    for _, data in ipairs(shopsData) do
-        Tab2:CreateButton({
-            Name = "Buy: " .. data.Item,
-            Callback = function()
-                local found = false
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("ProximityPrompt") and (string.find(obj.Parent.Name, data.Item) or string.find(obj.ObjectText, data.Item)) then
-                        fireproximityprompt(obj)
-                        found = true; break
-                    end
-                end
-                if not found then
-                    Rayfield:Notify({Title = "Error", Content = "Item not found!", Duration = 2})
-                end
-            end
-        })
-    end
+AddStatToggle("Strength", 1)
+AddStatToggle("Health", 2)
+AddStatToggle("Psychic", 3)
+AddStatToggle("Defense", 5)
+AddStatToggle("Magic", 6)
+AddStatToggle("Melee", 7)
+AddStatToggle("Aura", 8)
 
-    -- TAB 3: COMBAT
-    local Tab3 = Window:CreateTab("Combat", "swords")
-    Tab3:CreateToggle({
-        Name = "⚔️ Auto Farm Zones (1-9)",
-        Callback = function(v)
-            _G.AutoMonster = v
+-- --- TAB 2: AUTO COMBAT (ZONE SELECTOR) ---
+Tab2:CreateSection("Zone Settings")
+
+Tab2:CreateDropdown({
+    Name = "📍 Select Farming Zone",
+    Options = {"1","2","3","4","5","6","7","8","9","10","11","12"},
+    CurrentOption = {"1"},
+    MultipleOptions = false,
+    Callback = function(Option)
+        _G.SelectedZone = Option[1]
+    end,
+})
+
+Tab2:CreateSlider({
+    Name = "God Mode Height",
+    Range = {5, 50},
+    Increment = 1,
+    CurrentValue = _G.Height,
+    Callback = function(v) _G.Height = v end,
+})
+
+Tab2:CreateToggle({
+    Name = "⚔️ Auto Farm Selected Zone",
+    CurrentValue = _G.AutoMonster,
+    Callback = function(v)
+        _G.AutoMonster = v
+        if v then
             task.spawn(function()
                 while _G.AutoMonster do
                     local char, hrp, hum = getChar()
                     if char then
-                        for i = 1, 9 do
-                            if not _G.AutoMonster then break end
-                            local zone = enemiesFolder:FindFirstChild(tostring(i))
-                            if zone then
-                                for _, enemy in pairs(zone:GetChildren()) do
-                                    if enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy:FindFirstChild("HumanoidRootPart") then
-                                        while _G.AutoMonster and enemy.Parent and enemy.Humanoid.Health > 0 and hum.Health > 0 do
-                                            pcall(function() 
-                                                hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, _G.Height, 0)
-                                                AbilityEvent:FireServer("Punch", hrp.Position, 2, enemy)
-                                            end)
-                                            task.wait(0.1)
-                                        end
-                                    end
-                                end
+                        local target, t_hrp = getTarget(_G.SelectedZone)
+                        if target then
+                            while _G.AutoMonster and target.Parent and target.Humanoid.Health > 0 and hum.Health > 0 do
+                                pcall(function()
+                                    hrp.CFrame = t_hrp.CFrame * CFrame.new(0, _G.Height, 0)
+                                    AbilityEvent:FireServer("Punch", hrp.Position, 2, target)
+                                end)
+                                task.wait(0.1)
                             end
+                        else
+                            task.wait(1)
                         end
                     end
-                    task.wait(0.5)
+                    task.wait(0.1)
                 end
             end)
         end
-    })
+    end
+})
 
-    -- Anti-AFK
-    player.Idled:Connect(function()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
-    end)
+-- --- TAB 3: AUTO INTERACT ---
+Tab3:CreateSection("Interaction Tools")
 
-    Rayfield:Notify({Title = "STEMTV SYSTEM", Content = "Script Started! Welcome คุณ STEMTV", Duration = 5})
-end
+Tab3:CreateToggle({
+    Name = "🔘 Auto Interact (NPC & E)",
+    CurrentValue = _G.AutoInteract,
+    Callback = function(v)
+        _G.AutoInteract = v
+        if v then
+            task.spawn(function()
+                while _G.AutoInteract do
+                    pcall(function()
+                        for _, prompt in ipairs(game:GetDescendants()) do
+                            if prompt:IsA("ProximityPrompt") then
+                                fireproximityprompt(prompt)
+                            end
+                        end
+                    end)
+                    task.wait(1)
+                end
+            end)
+        end
+    end
+})
+
+-- ===================== ANTI-AFK =====================
+player.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
+
+Rayfield:Notify({
+    Title = "STEMTV AIO Loaded",
+    Content = "✅ Authentication Verified\n🔧 Ready to farm!",
+    Duration = 5,
+    Image = 4483362458,
+})
